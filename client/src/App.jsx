@@ -10,6 +10,7 @@ function App() {
   const [history, setHistory] = useState([]);
 
   const handleShorten = () => {
+    
     if (!url) return;
 
     if (!url.startsWith("http")) {
@@ -32,6 +33,7 @@ function App() {
 
       setLoading(false);
     }, 1200);
+
   };
 
   const handleCopy = async () => {
@@ -41,6 +43,7 @@ function App() {
   };
 
   return (
+
     <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-100 via-white to-gray-100 px-4">
 
       <div className="bg-white shadow-2xl rounded-2xl p-8 w-full max-w-xl border border-gray-100 transition-all duration-300">
@@ -143,8 +146,12 @@ function App() {
         )}
 
       </div>
+
     </div>
+
   );
+
 }
+
 
 export default App;
