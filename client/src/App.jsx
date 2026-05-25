@@ -41,7 +41,7 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-white to-gray-100 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-100 via-white to-gray-100 px-4">
 
       <div className="bg-white shadow-2xl rounded-2xl p-8 w-full max-w-xl border border-gray-100 transition-all duration-300">
 
