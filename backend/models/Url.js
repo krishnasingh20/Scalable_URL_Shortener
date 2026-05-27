@@ -30,7 +30,8 @@ const urlSchema = new mongoose.Schema(//it take two things- first one is schemaf
         },
 
         expiresAt: {
-            type: Date
+            type: Date,
+            expires: 0,
         },
 
         visitHistory: [
