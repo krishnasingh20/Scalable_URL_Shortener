@@ -2,6 +2,7 @@ import { useState } from "react";
 import UrlForm from "./components/UrlForm";
 import ResultBox from "./components/ResultBox";
 import History from "./components/History";
+import api from "./api/axios";
 
 function App() {
   const [url, setUrl] = useState("");
@@ -11,29 +12,37 @@ function App() {
   const [error, setError] = useState("");
   const [history, setHistory] = useState([]);
 
-  const handleShorten = () => {
+  const handleShorten = async () => {
     if (!url) return;
-
-    if (!url) {
-      setError("Please enter a valid URL");
-      return;
-    }
 
     setError("");
     setLoading(true);
 
-    setTimeout(() => {
-      const generated = "https://short.ly/demo123";
+    try {
+      const { data } = await api.post("/url/shorten", {
+        originalUrl: url,
+      });
 
-      setShortUrl(generated);
+      const shortLink = `http://localhost:3000/${data.data.shortCode}`;
 
-      setHistory((prev) => [
-        { long: url, short: generated },
-        ...prev,
-      ]);
+      setShortUrl(shortLink);
 
-      setLoading(false);
-    }, 1200);
+      setHistory((prev) => {
+      const filtered = prev.filter(item => item.long !== url);
+
+        return [
+          { long: url, short: shortLink },
+          ...filtered,
+        ];
+        
+      });
+
+    }
+    catch (err) {
+      setError(err.response?.data?.message || "Server Error");
+    }
+
+    setLoading(false);
   };
 
   const handleCopy = async () => {
