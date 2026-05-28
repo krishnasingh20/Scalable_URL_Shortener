@@ -10,6 +10,16 @@ const shortenUrl = async (req, res) => {
         const existingLongUrl = await Url.findOne({ originalUrl });
 
         if(existingLongUrl) {
+
+            if(expiresAt) {
+                let newExpiry = new Date(expiresAt);
+
+                if(!existingLongUrl.expiresAt || newExpiry > existingLongUrl.expiresAt) {
+                    existingLongUrl.expiresAt = newExpiry;
+                    await existingLongUrl.save();
+                }
+            }
+            
             return res.status(200).json({
                 message: "URL already exists",
                 data: existingLongUrl,
