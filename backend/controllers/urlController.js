@@ -2,66 +2,66 @@ const Url = require("../models/Url");
 const { nanoid } = require("nanoid");
 const validator = require("validator");
 
+
 const shortenUrl = async (req, res) => {
     try {
-        const { originalUrl, customAlias, expiresAt } = req.body;
+        const { originalUrl, customAlias, expiresAt} = req.body;
 
-        //validation
-        if(!originalUrl) {
-            return res.status(400).json({
-                message: "original URL is required",
+        const existingLongUrl = await Url.findOne({ originalUrl });
+
+        if(existingLongUrl) {
+            return res.status(200).json({
+                message: "URL already exists",
+                data: existingLongUrl,
             });
         }
 
-        // auto add https if missing 
-        let formattedUrl = originalUrl;
+        // generate shortcode 
+        let shortCode = customAlias || nanoid(6);
 
-        if(!formattedUrl.startsWith("http://") && !formattedUrl.startsWith("https://")) {
-            formattedUrl = `https://${formattedUrl}`;
+        let savedUrl;
+
+        while(true) {
+            try {
+                savedUrl = await Url.create({
+                    originalUrl,
+                    shortCode,
+                    customAlias,
+                    expiresAt,
+                });
+
+                break;
+            }
+            catch (error) {
+                if(error.code == 11000) {
+                    if(customAlias) {
+                        return res.status(409).json({
+                            message: "Custom alias already exists",
+                        });
+                    }
+
+                    shortCode = nanoid(6);
+
+                    continue;
+                }
+
+                throw error;
+            }
         }
 
-        // validate URL
-        if(!validator.isURL(formattedUrl)) {
-            return res.status(400).json({
-                message: "Invalid URL",
-            });
-        }
-
-        //if custom Alias is provided use it otherwise generate nanoid
-        const shortCode = customAlias || nanoid(6);
-
-        //check if shortcode already exists
-        const existingUrl = await Url.findOne({
-            shortCode,
-        });
-
-        if(existingUrl) {
-            return res.status(400).json({
-                message: "Short code already exists",
-            });
-        }
-
-        const newUrl = await Url.create({
-            originalUrl: formattedUrl,
-            shortCode,
-            customAlias,
-            expiresAt,
-        });
-
-        res.status(201).json({
+        return res.status(201).json({
             message: "Short URL created successfully",
-            data: newUrl,
-        })
-
+            data: savedUrl,
+        });
     }
     catch (error) {
-
-        res.status(500).json({
+        return res.status(500).json({
             message: "Server error",
             error: error.message,
         });
     }
 };
+
 
 
 const redirectUrl = async (req, res) => {
@@ -117,6 +117,7 @@ const redirectUrl = async (req, res) => {
 };
 
 
+
 const getAllurls = async (req, res) => {
     try {
         const urls = await Url.find().sort({
@@ -135,6 +136,7 @@ const getAllurls = async (req, res) => {
         });
     }
 };
+
 
 
 module.exports = {
